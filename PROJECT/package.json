@@ -1,0 +1,20 @@
+{
+  "name": "mi-proyecto-financiero",
+  "version": "1.0.0",
+  "description": "Problema de programación con JavaScript y pruebas BDD",
+  "scripts": {
+    "test": "cucumber-js features/",
+    "test:html": "cucumber-js features/ --format html:cucumber-report.html"
+  },
+  "keywords": [
+    "bdd",
+    "cucumber",
+    "javascript"
+  ],
+  "author": "Mauro",
+  "license": "ISC",
+  "devDependencies": {
+    "@cucumber/cucumber": "^12.2.0",
+    "chai": "^6.0.1"
+  }
+}
