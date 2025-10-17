@@ -1,0 +1,179 @@
+1. Desarrollo de Diagrama de Flujo (Lógica de Suma de Dígitos)
+El diagrama de flujo corresponde a la lógica de Suma de Dígitos (implementada en el código C):
+
+Inicio
+
+Inicialización: suma = 0, temp_numero = abs(numero).
+
+Bucle (WHILE): Mientras temp_numero > 0:
+
+Cálculo del Dígito: digito = temp_numero % 10 (resto).
+
+Acumulación: suma += digito.
+
+Avance: temp_numero /= 10 (cociente).
+
+Volver a la condición.
+
+Fin: Mostrar suma.
+
+2. Explicación/Comentarios de Sentencias (Bucle de División en Ensamblador)
+MOV DX, 0: Inicializa DX a cero. Crucial antes de la división (DIV) para que el dividendo de 32 bits (DX:AX) sea solo el valor de AX.
+
+DIV BX: Divide AX por 10 (divisor en BX). El Cociente (el nuevo número) queda en AX, y el Resto (el dígito) queda en DX.
+
+ADD [SUMA_TOTAL], DX: Suma el dígito (DX) al acumulador SUMA_TOTAL. Acumula el dígito extraído.
+
+JNE SUMA_LOOP: Salta si el cociente en AX no es cero. Continúa el ciclo hasta que el número se haya dividido completamente.
+
+5. Sentencias Usadas en Linux para Compilar y Linkear (Por Uziel)
+Instalar nasm
+sudo apt-get install nasm
+Compilar para 32 bits
+
+nasm -f elf32 factorial.asm -o factorial.o
+
+Linkear
+
+ld -m elf_i386 factorial.o -o factorial
+
+Ejecutar
+
+./factorial
+
+Mis disculpas. Entiendo perfectamente: necesitas el texto organizado por los puntos de la actividad, sin ningún formato de tabla, para copiar y pegar fácilmente.
+
+Ajustaré las separaciones y eliminaré todos los símbolos que puedan interpretarse como tablas (como los dos puntos : y los pipes | de Markdown).
+
+Aquí tienes el texto final, limpio y ordenado, listo para tu Google Colab:
+
+💻 Actividad - Respuestas Organizadas para Colab
+Materia: Arquitectura de Computadoras y Sistemas Operativos Fecha: 17 de Octubre de 2025 Nombres de integrantes: [Nombre del Integrante 1], [Nombre del Integrante 2], [Nombre del Integrante 3], ...
+
+1. Desarrollo de Diagrama de Flujo (Lógica de Suma de Dígitos)
+El diagrama de flujo corresponde a la lógica de Suma de Dígitos (implementada en el código C):
+
+Inicio
+
+Inicialización: suma = 0, temp_numero = abs(numero).
+
+Bucle (WHILE): Mientras temp_numero > 0:
+
+Cálculo del Dígito: digito = temp_numero % 10 (resto).
+
+Acumulación: suma += digito.
+
+Avance: temp_numero /= 10 (cociente).
+
+Volver a la condición.
+
+Fin: Mostrar suma.
+
+2. Explicación/Comentarios de Sentencias (Bucle de División en Ensamblador)
+MOV DX, 0: Inicializa DX a cero. Crucial antes de la división (DIV) para que el dividendo de 32 bits (DX:AX) sea solo el valor de AX.
+
+DIV BX: Divide AX por 10 (divisor en BX). El Cociente (el nuevo número) queda en AX, y el Resto (el dígito) queda en DX.
+
+ADD [SUMA_TOTAL], DX: Suma el dígito (DX) al acumulador SUMA_TOTAL. Acumula el dígito extraído.
+
+JNE SUMA_LOOP: Salta si el cociente en AX no es cero. Continúa el ciclo hasta que el número se haya dividido completamente.
+
+5. Sentencias Usadas en Linux para Compilar y Linkear (Por Uziel)
+Instalar nasm
+
+Bash
+
+sudo apt-get install nasm
+Compilar para 32 bits
+
+Bash
+
+nasm -f elf32 factorial.asm -o factorial.o
+Linkear
+
+Bash
+
+ld -m elf_i386 factorial.o -o factorial
+Ejecutar
+
+Bash
+
+./factorial
+6. Investigar y Agregar Sentencias para Ingresar Valores por Teclado
+El problema en Ensamblador es la Conversión de ASCII a valor numérico.
+
+Problema (Tratamiento de ASCII): El número ingresado se almacena como un código ASCII (ej: '5' es 53), no como su valor numérico real (5).
+
+Metodología de Resolución (Conversión Explícita): Se debe implementar la sentencia de conversión dentro del bucle de procesamiento de dígitos:
+
+Sentencia clave: SUB AL, '0' (o SUB AL, 48)
+
+Función: Restar el valor ASCII del carácter '0' al código ASCII del dígito, obteniendo su valor binario real.
+
+7. Generar en Google Colab la misma versión en C
+Código en C que resuelve la suma de los dígitos de un número entero:
+%%writefile suma_digitos.c
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int numero;
+    int suma = 0;
+    int digito;
+
+    printf("Ingrese un numero entero: ");
+
+    if (scanf("%d", &numero) != 1) {
+        printf("Error al leer el numero.\n");
+        return 1;
+    }
+
+    int temp_numero = abs(numero);
+
+    while (temp_numero > 0) {
+        digito = temp_numero % 10;
+        suma += digito;
+        temp_numero /= 10;
+    }
+
+    printf("La suma de los digitos de %d es: %d\n", numero, suma);
+
+    return 0;
+}
+
+
+8. Ejecutar y obtener el programa en lenguaje ensamblador del Item 7
+Comandos usados:
+
+!gcc suma_digitos.c -o suma_digitos
+!./suma_digitos
+!gcc -S suma_digitos.c
+!cat suma_digitos.s
+
+
+El código ensamblador generado (suma_digitos.s) es el bloque de texto extenso que comienza con .file "suma_digitos.c".
+
+9. Comparar las Versiones de Ensamblador
+Análisis Comparativo:
+
+El código generado por GCC (suma_digitos.s) es un ejemplo de optimización de código máquina (más rápido), mientras que el código Manual (mi_suma.asm) es un ejemplo de legibilidad y fidelidad a la lógica algorítmica.
+
+Optimización: GCC evita la instrucción lenta DIV, usando secuencias de IMUL y shifts para mayor velocidad.
+
+Legibilidad: El código manual es más legible. El código de GCC es complejo, incluye llamadas a funciones de C y gestión avanzada de registros y pila.
+
+10. Observar Situaciones Problemáticas e Identificar Metodología de Resolución
+1. Conflicto en la Instrucción DIV: Análisis de la arquitectura: Implementar MOV DX, 0 antes de la división para asegurar el dividendo correcto de 32 bits.
+
+2. Ingreso y Conversión de Datos: Conversión Explícita: Implementar SUB AL, '0' para convertir el código ASCII del dígito ingresado en su valor binario real.
+
+3. Adaptación de Plataforma: Investigación de Documentación (Syscalls): Reemplazar las interrupciones de DOS (INT 21H) con el uso de syscall para interactuar con Linux.
+
+13. ¿Por qué en el Ejercicio 3: Suma de Array con Direccionamiento Indexado, el “ADD SI, 2” avanza de 2?
+Respuesta a Pregunta Teórica:
+
+La instrucción ADD SI, 2 se usa para avanzar el puntero de índice (SI) en dos bytes porque los elementos del array fueron definidos con la directiva DW (Define Word).
+
+En la arquitectura de 16 bits, una Word (Palabra) ocupa exactamente 2 bytes de memoria.
+
+Para pasar al elemento siguiente en el array, el puntero debe saltar exactamente 2 bytes. El número 2 coincide con el tamaño en bytes del tipo de dato definido.
