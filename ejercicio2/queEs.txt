@@ -1,0 +1,299 @@
+1- Desarrollar un diagrama de flujo, por ejemplo usando Dia, o alguna versión online.
+"""
++----------------+
+|     INICIO     |
++----------------+
+        |
+        V
++----------------+
+| Inicializar AX |
+|   (AX = 1)     |
++----------------+
+        |
+        V
++----------------------+
+| Inicializar CX con   |
+| el valor de 'num'    |
+| (CX = [num] = 5)     |
++----------------------+
+        |
+        V
++----------------------+
+|   ¿CX == 0? (CMP)    |
+|      (CX, 0)         |
++----------+-----------+
+    SI /     \ NO
+      /       \
+     V         V
++----------+  +--------------------+
+| FACT_DONE|  | FACT_LOOP: MUL CX  |
+|          |  | (AX = AX * CX)     |
++----------+  +--------------------+
+               |
+               V
+            +----------------+
+            | LOOP FACT_LOOP |
+            |  (Decrementa   |
+            |   CX y salta   |
+            |  si CX != 0)   |
+            +----------------+
+               |
+               V (Cuando CX = 0)
+            +----------+
+            | FACT_DONE|
+            |          |
+            +----------+
+                 |
+                 V
+          +--------------------+
+          | Almacenar AX en    |
+          | 'result'           |
+          | ([result] = AX)    |
+          +--------------------+
+                 |
+                 V
+          +--------------------+
+          |   Finalizar Proceso|
+          |  (INT 21h, AH=4Ch) |
+          +--------------------+
+                 |
+                 V
+            +----------+
+            |    FIN   |
+            +----------+
+
+
+Ejercicio 2: Factorial con Multiplicación
+.MODEL SMALL .STACK 100h .DATA num DW 5 result DD ? .CODE START: MOV AX, @DATA MOV DS, AX
+
+MOV AX, 1
+MOV CX, [num]       ; Direccionamiento directo
+CMP CX, 0
+JE FACT_DONE
+FACT_LOOP: MUL CX ; AX = AX * CX LOOP FACT_LOOP
+
+FACT_DONE: MOV [result], AX ; Almacenar resultado
+
+MOV AH, 4Ch
+INT 21h
+END START """
+
+
+#2- Explicar, comentar las sentencias que no tienen comentarios.
+
+
+START:
+    MOV AX, @DATA      ; Carga la dirección del segmento de datos en AX
+    MOV DS, AX         ; Mueve esa dirección al registro DS (Data Segment)
+    
+    MOV AX, 1          ; Inicializa AX con 1 (acumulador del factorial)
+    MOV CX, [num]      ; Carga el valor de 'num' en CX (contador)
+    CMP CX, 0          ; Compara CX con 0
+    JE FACT_DONE       ; Si es igual, salta a FACT_DONE
+    
+FACT_LOOP:
+    MUL CX             ; Multiplica AX por CX (resultado en DX:AX)
+    LOOP FACT_LOOP     ; Decrementa CX y salta si CX ≠ 0
+    
+FACT_DONE:
+    MOV [result], AX   ; Guarda el resultado en la variable 'result'
+    
+    MOV AH, 4Ch        ; Función de DOS para terminar programa
+    INT 21h            ; Llamada al sistema DOS
+
+3---
+
+4- Implementar en linux. De no tener uno, usar Google Colab.
+
+%%writefile factorial_sim.c
+#include <stdio.h>
+
+void calcular_factorial_asm_sim(int num) {
+    // SIMULACIÓN DE REGISTROS
+    long long AX = 1;     // Simula el Acumulador (AX)
+    int CX = num;         // Simula el Contador (CX)
+    int num_orig = num;
+
+    if (num < 0) {
+        printf("Error: Factorial no definido para negativos.\n");
+        return;
+    }
+
+    // CMP CX, 0 / JE FACT_DONE
+    if (CX == 0) {
+        goto FACT_DONE;
+    }
+
+// Etiqueta: FACT_LOOP:
+FACT_LOOP:
+    // Simulación: MUL CX (AX = AX * CX)
+    AX = AX * CX;
+
+    // Simulación: DEC CX
+    CX--;
+
+    // Simulación: JNE FACT_LOOP
+    if (CX > 0) {
+        goto FACT_LOOP;
+    }
+
+// Etiqueta: FACT_DONE:
+FACT_DONE:
+    // Imprimir el resultado (Simulación de "mostrar salida")
+    printf("--- Simulación Ensamblador (GOTO) en C ---\n");
+    printf("El factorial de %d es: %lld\n", num_orig, AX);
+
+}
+
+int main() {
+    int numero = 5; // El número a calcular
+    calcular_factorial_asm_sim(numero);
+
+    return 0;
+}
+
+5- Pegar las sentencias usadas en linux para compilar y linkear.Lo hizo Uziel
+Instalar nasm
+sudo apt-get install nasm
+
+Compilar para 32 bits
+nasm -f elf32 factorial.asm -o factorial.o
+
+Linkear
+ld -m elf_i386 factorial.o -o factorial
+
+Ejecutar
+./factorial
+
+Ver resultado con debugger
+gdb ./factorial
+
+---
+
+#6- Investigar y agregar sentencias para ingresar valores por teclado en un par de ejercicios.
+
+section .data
+    prompt db 'Ingrese un numero: ', 0
+    result_msg db 'Factorial: ', 0
+    num dw 0
+    result dd 0
+
+section .bss
+    buffer resb 10
+
+section .text
+    global _start
+
+_start:
+    ; Mostrar prompt
+    mov eax, 4
+    mov ebx, 1
+    mov ecx, prompt
+    mov edx, 17
+    int 0x80
+    
+    ; Leer entrada
+    mov eax, 3
+    mov ebx, 0
+    mov ecx, buffer
+    mov edx, 10
+    int 0x80
+    
+    ; Convertir ASCII a número
+    mov esi, buffer
+    call atoi
+    mov [num], ax
+    
+    ; Calcular factorial
+    mov ax, 1
+    mov cx, [num]
+    cmp cx, 0
+    je fact_done
+    
+fact_loop:
+    mul cx
+    loop fact_loop
+    
+fact_done:
+    mov [result], ax
+    
+    ; Salir
+    mov eax, 1
+    mov ebx, 0
+    int 0x80
+
+; Función atoi (ASCII to integer)
+atoi:
+    xor eax, eax
+    xor ebx, ebx
+.convert:
+    mov bl, [esi]
+    cmp bl, 10
+    je .done
+    sub bl, '0'
+    imul eax, 10
+    add eax, ebx
+    inc esi
+    jmp .convert
+.done:
+    ret
+
+7---
+8- Ejecutar y obtener el programa en lenguaje ensamblador del item 7.
+.file   "factorial.c"
+.text
+.globl  main
+.type   main, @function
+main: pushq %rbp movq %rsp, %rbp subq $16, %rsp movl $5, -8(%rbp) movq $1, -16(%rbp) cmpl $0, -8(%rbp) jne .L2 movq $1, -16(%rbp) jmp .L3 .L2: movl -8(%rbp), %eax movl %eax, -4(%rbp) jmp .L4 .L5: movslq -4(%rbp), %rax imulq %rax, -16(%rbp) subl $1, -4(%rbp) .L4: cmpl $0, -4(%rbp) jg .L5 .L3: movl -8(%rbp), %eax movq -16(%rbp), %rdx movl %eax, %esi leaq .LC0(%rip), %rdi movl $0, %eax call printf@PLT movl $0, %eax leave ret
+
+9. Comparación de versiones de ensamblador
+Nuestra versión (MASM/TASM):
+
+Más compacta (15 líneas)
+
+Usa registros directamente
+
+Instrucción LOOP automática
+
+Sintaxis Intel
+
+Versión GCC:
+
+Más verbosa (30+ líneas)
+
+Usa memoria en stack
+
+Manejo de 64 bits
+
+Sintaxis AT&T
+
+Incluye llamadas a librerías
+
+10. Situaciones problemáticas identificadas
+Overflow: El factorial crece rápido, en 16 bits solo funciona hasta 8!
+
+Entrada de datos: Conversión ASCII-number compleja
+
+Portabilidad: Diferencias Windows/Linux en llamadas al sistema
+
+Debugging: Difícil sin herramientas visuales
+
+11. Metodología de resolución
+Divide y vencerás: Separar en funciones pequeñas
+
+Prototipado rápido: Empezar con versión simple
+
+Pruebas incrementales: Probar con valores pequeños primero
+
+Documentación: Comentar cada paso
+
+12. Respuesta específica: ¿Por qué ADD SI, 2?
+En el ejercicio de "Suma de Array con Direccionamiento Indexado", el ADD SI, 2 avanza de 2 en 2 bytes porque:
+
+Cada elemento del array es de 16 bits (WORD) = 2 bytes
+
+SI (Source Index) es un registro de 16 bits que apunta a memoria
+
+Para moverse al siguiente elemento, debe saltar 2 posiciones de memoria
+
+Si fuera ADD SI, 1 apuntaría a la mitad del número actual
