@@ -1,3 +1,6 @@
- METODOLOGÍA DE PROBLEMAS
+arquitectura en computadoras
 
-Este repositorio contiene la metodología de resolución de problemas
+monzon mauro
+angelica morales
+paz francisco
+marquez franco 
