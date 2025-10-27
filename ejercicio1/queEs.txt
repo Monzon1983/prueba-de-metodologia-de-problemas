@@ -1,0 +1,118 @@
+ACTIVIDAD 1
+┌─────────────────────────────┐
+│          INICIO             │
+└─────────────┬───────────────┘
+              │
+              ▼
+ ┌──────────────────────────────┐
+ │ Configurar segmento de datos │
+ └─────────────┬────────────────┘
+               │
+               ▼
+ ┌──────────────────────────────┐
+ │ fib[0]=0 ; fib[1]=1          │
+ │ CX=8 ; SI=4                  │
+ └─────────────┬────────────────┘
+               │
+               ▼
+      ┌────────────────────┐
+      │ ¿CX = 0?           │
+      └───────┬────────────┘
+              │NO
+              ▼
+ ┌──────────────────────────────┐
+ │ AX = fib[SI-4] + fib[SI-2]   │
+ │ fib[SI] = AX                 │
+ │ SI = SI + 2                  │
+ │ CX = CX - 1                  │
+ └─────────────┬────────────────┘
+               │
+               └────► Repite (FIB_LOOP)
+               │
+               ▼
+ ┌──────────────────────────────┐
+ │ Mostrar mensaje "Fibonacci:" │
+ └─────────────┬────────────────┘
+               │
+               ▼
+ ┌──────────────────────────────┐
+ │ CX=10 ; SI=0                 │
+ └─────────────┬────────────────┘
+               │
+               ▼
+     ┌────────────────────┐
+     │ ¿CX = 0?           │
+     └───────┬────────────┘
+             │NO
+             ▼
+ ┌──────────────────────────────┐
+ │ AX = fib[SI]                 │
+ │ CALL PRINT_NUMBER             │
+ │ SI = SI + 2                  │
+ │ CX = CX - 1                  │
+ └─────────────┬────────────────┘
+               │
+               └────► Repite (DISPLAY)
+               │
+               ▼
+      ┌────────────────────┐
+      │       FIN           │
+      └────────────────────┘
+
+2)
+| Sentencia                         | Explicación                                                                                               |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `MOV AX, DATA_SEG` / `MOV DS, AX` | Inicializa el **segmento de datos** para que `[NUM1]`, `[NUM2]`, `[ARR_NUM]` apunten correctamente.       |
+| `MOV AH, 01 / INT 21h`            | Lee **un carácter desde el teclado** y lo pone en `AL`.                                                   |
+| `CMP AL,13 / JZ ...`              | Verifica si el usuario presionó **Enter** (código ASCII 13).                                              |
+| `SUB AL,48`                       | Convierte un carácter ASCII ('0'–'9') a su valor numérico (0–9).                                          |
+| `MUL MUL_FAC`                     | Multiplica `AX` por 10 (`MUL_FAC = 10`) para desplazar los dígitos al acumular números de varios dígitos. |
+| `ADD BX,AX / MOV NUM1,BX`         | Acumula el valor convertido en `NUM1` o `NUM2`.                                                           |
+| `DIV BX`                          | Divide `AX` por 10 para obtener cada dígito del resultado.                                                |
+| `ADD DX,48`                       | Convierte el dígito numérico a ASCII para imprimir.                                                       |
+| `INT 21h / AH=02h`                | Imprime un carácter en pantalla (`DL`).                                                                   |
+| `MOV AH,4Ch / INT 21h`            | Termina el programa en DOS.                                                                               |
+
+# 6)
+# MOV AH,01
+# INT 21h     ; lee un carácter en AL
+# SUB AL,48   ; convierte ASCII a número
+%%writefile sum_numbers.c
+#include <stdio.h>
+
+7)
+int main() {
+    int num1, num2;
+    printf("Ingrese el 1er número: ");
+    scanf("%d", &num1);
+    printf("Ingrese el 2do número: ");
+    scanf("%d", &num2);
+    printf("La suma de los números es: %d\n", num1 + num2);
+    return 0;
+}
+
+8)
+!gcc -S sum_array.c -o sum_array.s
+!cat sum_array.s
+
+9)
+| Característica | Versión original 8086     | Versión de GCC (Linux 64-bit)                        |
+| -------------- | ------------------------- | ---------------------------------------------------- |
+| Entrada        | `INT 21h` / AH=01         | `scanf` (syscall)                                    |
+| Salida         | `INT 21h` / AH=02         | `printf` (libc)                                      |
+| Segmentos      | `.DATA`, `.CODE`          | Secciones `.data`, `.text` generadas automáticamente |
+| Registros      | AX, BX, CX, SI, DI        | Registros modernos x86_64, convenciones de ABI       |
+| Bucle / lógica | `LOOP`, indexación manual | Ciclos y operaciones de alto nivel compiladas        |
+
+13)
+ Por qué ADD SI, 2 avanza de 2
+
+ARR_NUM es un array de DW (palabras) → cada elemento ocupa 2 bytes.
+
+SI apunta a la dirección del elemento actual.
+
+Para moverse al siguiente elemento, hay que sumar el tamaño en bytes de un elemento → ADD SI, 2.
+
+Si fuera DB (byte), se usaría ADD SI, 1.
+
+Conclusión: ADD SI,2 avanza correctamente al siguiente número completo del array de palabras de 16 bits.
